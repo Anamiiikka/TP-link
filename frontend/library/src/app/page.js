@@ -6,18 +6,18 @@ export default function Home() {
 
   if (!session) {
     return (
-      <div style={{ padding: 24 }}>
+      <main style={{ padding: 24 }}>
         <h1>Library Portal</h1>
         <button onClick={() => signIn("keycloak")}>Login</button>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div style={{ padding: 24 }}>
+    <main style={{ padding: 24 }}>
       <h1>Welcome {session.user?.name || session.user?.email}</h1>
       <p>Admission Number: {session.user?.sub}</p>
       <button onClick={() => signOut()}>Logout</button>
-    </div>
+    </main>
   );
 }

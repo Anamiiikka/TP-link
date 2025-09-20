@@ -4,7 +4,7 @@ import KeycloakProvider from "next-auth/providers/keycloak";
 export default NextAuth({
   providers: [
     KeycloakProvider({
-      clientId: "library-client",
+      clientId: "captive-portal",
       clientSecret: "", // public client + PKCE in dev
       issuer: "http://localhost:8080/realms/campus",
     }),
