@@ -4,7 +4,6 @@ import { useSession, signIn, signOut } from "next-auth/react";
 export default function Home() {
   const { data: session } = useSession();
 
-  // Glassy card styling
   const cardStyle = {
     background: "rgba(255,255,255,0.95)",
     borderRadius: 20,
@@ -17,6 +16,26 @@ export default function Home() {
     border: "1.5px solid #dde9fa"
   };
 
+  async function handleLogout() {
+    // Clear local app session first
+    await signOut({ redirect: false });
+
+    // End the Keycloak SSO session with id_token_hint and return to Library "/"
+    const issuer = "http://localhost:8080/realms/campus";
+    const postLogout = "http://localhost:3001/"; // must be allow-listed in library-client
+    const idToken = session?.idToken;
+
+    if (idToken) {
+      const url =
+        `${issuer}/protocol/openid-connect/logout` +
+        `?id_token_hint=${encodeURIComponent(idToken)}` +
+        `&post_logout_redirect_uri=${encodeURIComponent(postLogout)}`;
+      window.location.href = url;
+    } else {
+      window.location.href = postLogout; // fallback on first run after code change
+    }
+  }
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -27,18 +46,10 @@ export default function Home() {
     }}>
       {!session ? (
         <div style={cardStyle}>
-          <h1 style={{
-            fontSize: 32,
-            fontWeight: 700,
-            color: "#5541ac",
-            marginBottom: 10
-          }}>📚 Library Portal</h1>
-          <p style={{
-            color: "#674ea7",
-            fontSize: 17,
-            marginBottom: 30,
-            fontWeight: 500
-          }}>
+          <h1 style={{ fontSize: 32, fontWeight: 700, color: "#5541ac", marginBottom: 10 }}>
+            📚 Library Portal
+          </h1>
+          <p style={{ color: "#674ea7", fontSize: 17, marginBottom: 30, fontWeight: 500 }}>
             Please sign in to access library resources.
           </p>
           <button
@@ -61,27 +72,17 @@ export default function Home() {
         </div>
       ) : (
         <div style={cardStyle}>
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#5c31c4",
-            marginBottom: 10
-          }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#5c31c4", marginBottom: 10 }}>
             Welcome {session.user?.name || session.user?.email}
           </h1>
-          <p style={{
-            color: "#7e57c2",
-            fontSize: 17,
-            fontWeight: 500
-          }}>Admission Number: {session.user?.sub}</p>
-          <p style={{
-            margin: "18px 0 24px",
-            color: "#48416b"
-          }}>
+          <p style={{ color: "#7e57c2", fontSize: 17, fontWeight: 500 }}>
+            Admission Number: {session.user?.sub}
+          </p>
+          <p style={{ margin: "18px 0 24px", color: "#48416b" }}>
             You now have access to all library resources.
           </p>
           <button
-            onClick={() => signOut()}
+            onClick={handleLogout}
             style={{
               padding: "10px 44px",
               borderRadius: 7,

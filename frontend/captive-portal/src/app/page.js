@@ -4,7 +4,6 @@ import { useSession, signIn, signOut } from "next-auth/react";
 export default function Home() {
   const { data: session } = useSession();
 
-  // Card style for glass effect
   const cardStyle = {
     background: "rgba(255,255,255,0.90)",
     borderRadius: 20,
@@ -17,7 +16,24 @@ export default function Home() {
     border: "1.5px solid #cff3ff"
   };
 
-  // Wrapper for background
+  async function handleLogout() {
+    await signOut({ redirect: false });
+
+    const issuer = "http://localhost:8080/realms/campus";
+    const postLogout = "http://localhost:3003/"; // must be allow-listed in captive-portal client
+    const idToken = session?.idToken;
+
+    if (idToken) {
+      const url =
+        `${issuer}/protocol/openid-connect/logout` +
+        `?id_token_hint=${encodeURIComponent(idToken)}` +
+        `&post_logout_redirect_uri=${encodeURIComponent(postLogout)}`;
+      window.location.href = url;
+    } else {
+      window.location.href = postLogout;
+    }
+  }
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -77,12 +93,11 @@ export default function Home() {
             marginBottom: 10,
             fontWeight: 500
           }}>Admission Number: {session.user?.sub}</p>
-          <p style={{
-            margin: "18px 0 24px",
-            color: "#5a5b70"
-          }}>You have secure network access.</p>
+          <p style={{ margin: "18px 0 24px", color: "#5a5b70" }}>
+            You have secure network access.
+          </p>
           <button
-            onClick={() => signOut()}
+            onClick={handleLogout}
             style={{
               padding: "10px 44px",
               borderRadius: 7,
