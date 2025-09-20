@@ -1,5 +1,6 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
+import Dashboard from "./components/Dashboard";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -17,13 +18,11 @@ export default function Home() {
   };
 
   async function handleLogout() {
-    // End app session
     await signOut({ redirect: false });
 
-    // Require an ID token for Keycloak end-session when the server demands it
     const idToken = session?.idToken;
     const issuer = "http://localhost:8080/realms/campus";
-    const postLogout = "http://localhost:3000/"; // must be allow-listed in client
+    const postLogout = "http://localhost:3000/";
 
     if (idToken) {
       const url =
@@ -32,17 +31,59 @@ export default function Home() {
         `&post_logout_redirect_uri=${encodeURIComponent(postLogout)}`;
       window.location.href = url;
     } else {
-      // Fallback: if no ID token (first run after code change), reload cleanly
       window.location.href = postLogout;
     }
   }
+
+  // CORRECTED: Decode the JWT access token to get roles
+  function getRolesFromSession(session) {
+    if (!session?.accessToken) {
+      console.log('No access token in session:', session);
+      return [];
+    }
+
+    try {
+      // Decode JWT access token
+      const token = session.accessToken;
+      const parts = token.split('.');
+      
+      if (parts.length !== 3) {
+        console.error('Invalid JWT format');
+        return [];
+      }
+
+      const payload = JSON.parse(atob(parts[1]));
+      console.log('Full JWT payload:', payload);
+      
+      // Extract roles from realm_access
+      const roles = payload.realm_access?.roles || [];
+      console.log('Realm roles found:', roles);
+      
+      return roles;
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return [];
+    }
+  }
+
+  // Get roles and determine user type
+  const roles = getRolesFromSession(session);
+  const isAdmin = roles.includes('Administrator') || roles.includes('administrator');
+  const isStudent = roles.includes('student');
+  
+  let primaryRole = 'UNKNOWN';
+  if (isAdmin) primaryRole = 'ADMINISTRATOR';
+  else if (isStudent) primaryRole = 'STUDENT';
+
+  console.log('All roles:', roles);
+  console.log('Primary role:', primaryRole);
+  console.log('Is admin:', isAdmin);
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(120deg,#fffdfe 0%,#def5fc 80%,#fffaff 100%)",
+        background: "linear-gradient(120deg,#fffdfe 0%,#def5fc 80%,#fffaff 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -76,34 +117,11 @@ export default function Home() {
           </button>
         </div>
       ) : (
-        <div style={cardStyle}>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#2284cb", marginBottom: 10 }}>
-            Welcome {session.user?.name || session.user?.email}
-          </h1>
-          <p style={{ color: "#5680a7", fontSize: 17, fontWeight: 500 }}>
-            Admission Number: {session.user?.sub}
-          </p>
-          <p style={{ margin: "18px 0 24px", color: "#385265" }}>
-            You are now connected to the LMS platform.
-          </p>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "10px 40px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "linear-gradient(90deg,#1a63be,#51e9f5 100%)",
-              color: "#fff",
-              border: "none",
-              boxShadow: "0 2px 12px #a4beee80",
-              letterSpacing: 1,
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
-        </div>
+        <Dashboard 
+          session={session} 
+          role={primaryRole}
+          onLogout={handleLogout}
+        />
       )}
     </div>
   );
