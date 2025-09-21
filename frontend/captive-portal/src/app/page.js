@@ -1,5 +1,10 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { 
+  getAdmissionNumber, 
+  checkNetworkAccess, 
+  logNetworkActivity 
+} from "../utils/identity";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -17,6 +22,11 @@ export default function Home() {
   };
 
   async function handleLogout() {
+    // IDENTITY-FIRST: Log network disconnect
+    if (session) {
+      logNetworkActivity(session, 'NETWORK_DISCONNECT');
+    }
+
     await signOut({ redirect: false });
 
     const issuer = "http://localhost:8080/realms/campus";
@@ -32,6 +42,25 @@ export default function Home() {
     } else {
       window.location.href = postLogout;
     }
+  }
+
+  // IDENTITY-FIRST: Get network access information
+  const admissionNumber = session ? getAdmissionNumber(session) : null;
+  const networkInfo = session ? checkNetworkAccess(session) : null;
+
+  // IDENTITY-FIRST: Log network access attempt
+  if (session && networkInfo) {
+    logNetworkActivity(session, 'NETWORK_ACCESS_REQUEST', {
+      ip: 'dynamic', // In real implementation, get actual IP
+      device: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+    });
+  }
+
+  // IDENTITY-FIRST: Enhanced logging
+  if (session) {
+    console.log('Network Identity:', admissionNumber);
+    console.log('Network Policy:', networkInfo?.networkPolicy);
+    console.log('Access Level:', networkInfo?.networkPolicy?.accessLevel);
   }
 
   return (
@@ -74,7 +103,43 @@ export default function Home() {
               letterSpacing: 1,
               cursor: "pointer"
             }}>
-            Login
+            Login with Admission Number
+          </button>
+        </div>
+      ) : networkInfo?.isUnconfirmed ? (
+        // IDENTITY-FIRST: Block unconfirmed users from network access
+        <div style={{...cardStyle, border: "1.5px solid #f39c12"}}>
+          <h1 style={{
+            fontSize: 28,
+            fontWeight: 700,
+            color: "#e67e22",
+            marginBottom: 12
+          }}>
+            Network Access Pending Approval
+          </h1>
+          <p style={{
+            fontSize: 18,
+            color: "#7f8c8d",
+            marginBottom: 10,
+            fontWeight: 500
+          }}>Identity: <strong>{admissionNumber}</strong></p>
+          <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 30 }}>
+            Your account requires admin approval for network access.
+            <br />Please wait for confirmation.
+          </p>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "10px 44px",
+              borderRadius: 7,
+              fontWeight: 600,
+              fontSize: 16,
+              background: "#e74c3c",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer"
+            }}>
+            Disconnect
           </button>
         </div>
       ) : (
@@ -92,7 +157,21 @@ export default function Home() {
             color: "#3d7356",
             marginBottom: 10,
             fontWeight: 500
-          }}>Admission Number: {session.user?.sub}</p>
+          }}>Identity: <strong>{admissionNumber}</strong></p>
+          <p style={{
+            fontSize: 16,
+            color: "#5a5b70",
+            marginBottom: 10
+          }}>
+            Network: {networkInfo?.networkPolicy?.vlan || 'Unknown VLAN'}
+          </p>
+          <p style={{
+            fontSize: 16,
+            color: "#5a5b70",
+            marginBottom: 10
+          }}>
+            Speed: {networkInfo?.networkPolicy?.bandwidth || 'Unknown'}
+          </p>
           <p style={{ margin: "18px 0 24px", color: "#5a5b70" }}>
             You have secure network access.
           </p>
