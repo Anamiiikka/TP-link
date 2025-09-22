@@ -13,15 +13,14 @@ export default function Home() {
 
   const cardStyle = {
     background: "rgba(255,255,255,0.95)",
-    borderRadius: 24,
-    boxShadow: "0 8px 40px 8px rgba(139, 92, 246, 0.15)",
-    padding: "48px 44px",
-    minWidth: 360,
+    borderRadius: 20,
+    boxShadow: "0 4px 32px 2px #d3e9ff77",
+    padding: "44px 40px",
+    minWidth: 330,
     maxWidth: "90vw",
     marginTop: 40,
     textAlign: "center",
-    border: "1px solid rgba(139, 92, 246, 0.2)",
-    backdropFilter: "blur(10px)",
+    border: "1.5px solid #dde9fa"
   };
 
   async function handleLogout() {
@@ -117,60 +116,104 @@ export default function Home() {
   console.log('Needs approval:', isUnconfirmed);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-100 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
-      <div className="relative z-10">
-        {!session ? (
-          <div className="flex items-center justify-center min-h-screen p-6">
-            <div style={cardStyle}>
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <span className="text-3xl">📚</span>
-              </div>
-              <h1 className="text-4xl font-black mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Library Portal
-              </h1>
-              <p className="text-gray-600 text-lg mb-8 font-medium">
-                Sign in to access your digital library and learning resources.
-              </p>
-              <button
-                onClick={() => signIn("keycloak")}
-                className="bg-gradient-to-r from-purple-500 via-purple-600 to-blue-600 hover:from-purple-600 hover:via-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl"
-              >
-                🔐 Login with Admission Number
-              </button>
-            </div>
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(120deg,#f9f6ff 0%,#caf7f6 70%,#dedfff 100%)",
+      padding: 20,
+    }}>
+      {!session ? (
+        <div style={{display:'flex', alignItems:'center', justifyContent:'center', minHeight:'80vh'}}>
+          <div style={cardStyle}>
+            <h1 style={{ fontSize: 32, fontWeight: 700, color: "#5541ac", marginBottom: 10 }}>
+              📚 Library Portal
+            </h1>
+            <p style={{ color: "#674ea7", fontSize: 17, marginBottom: 30, fontWeight: 500 }}>
+              Please sign in to access library resources.
+            </p>
+            <button
+              onClick={() => signIn("keycloak")}
+              style={{
+                marginTop: 15,
+                padding: "11px 42px",
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 17,
+                background: "linear-gradient(90deg,#6e63e9,#7fcaea 90%)",
+                color: "#fff",
+                border: "none",
+                boxShadow: "0 2px 16px #e4bcf860",
+                letterSpacing: 1,
+                cursor: "pointer"
+              }}>
+              Login with Admission Number
+            </button>
           </div>
-        ) : isUnconfirmed ? (
-          // IDENTITY-FIRST: Block unconfirmed users with their admission number
-          <div className="flex items-center justify-center min-h-screen p-6">
-            <div style={{...cardStyle, border: "1px solid rgba(245, 158, 11, 0.3)"}}>
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <span className="text-3xl">⏳</span>
+        </div>
+      ) : isUnconfirmed ? (
+        // IDENTITY-FIRST: Block unconfirmed users with their admission number
+        <div style={{display:'flex', alignItems:'center', justifyContent:'center', minHeight:'80vh'}}>
+          <div style={{...cardStyle, border: "1.5px solid #f39c12"}}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#e67e22", marginBottom: 12 }}>
+              Account Pending Approval
+            </h1>
+            <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 10 }}>
+              Identity: <strong>{admissionNumber}</strong>
+            </p>
+            <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 30 }}>
+              Your registration is successful but requires admin approval.
+              <br />Please wait for confirmation.
+            </p>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "10px 40px",
+                borderRadius: 7,
+                fontWeight: 600,
+                fontSize: 16,
+                background: "#e74c3c",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer"
+              }}>
+              Logout
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{maxWidth:1200, margin:'0 auto'}}>
+          <div style={{display:'flex', justifyContent:'flex-end', marginBottom:12}}>
+            <div style={{display:'flex', gap:8, alignItems:'center'}}>
+              <div style={{textAlign:'right', marginRight:8}}>
+                <div style={{fontSize:13, color:'#334155'}}>
+                  {session.user?.name || session.user?.email}
+                </div>
+                <div style={{fontSize:12, color:'#64748b'}}>
+                  Identity: {admissionNumber}
+                </div>
+                <div style={{fontSize:12, color:'#64748b'}}>
+                  {primaryRole}
+                </div>
+                <div style={{fontSize:11, color:'#94a3b8'}}>
+                  Roles: {roles.join(', ') || 'None'}
+                </div>
               </div>
-              <h1 className="text-3xl font-bold text-orange-600 mb-4">
-                Account Pending Approval
-              </h1>
-              <p className="text-gray-600 text-lg mb-2">
-                Identity: <strong className="text-purple-600">{admissionNumber}</strong>
-              </p>
-              <p className="text-gray-600 mb-8">
-                Your registration is successful but requires admin approval.
-                <br />Please wait for confirmation.
-              </p>
               <button
                 onClick={handleLogout}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-3 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                🚪 Logout
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer"
+                }}>
+                Logout
               </button>
             </div>
           </div>
-        ) : (
+
           <Dashboard 
             role={dashboardRole} 
             data={{ user: session.user, roles: roles }}
@@ -178,8 +221,8 @@ export default function Home() {
             onLogout={handleLogout}
             admissionNumber={admissionNumber}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
