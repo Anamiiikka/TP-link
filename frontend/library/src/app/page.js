@@ -94,13 +94,16 @@ export default function Home() {
   const isAdmin = roles.some(role => role.toLowerCase() === 'administrator');
   const isStudent = roles.some(role => role.toLowerCase() === 'student');
   const isUnconfirmed = roles.some(role => role.toLowerCase() === 'unconfirmed');
-  
-  // Determine primary role for display
+
+  // Determine primary role for display and dashboard
   let primaryRole = 'UNKNOWN';
+  let dashboardRole = 'student';
   if (isAdmin) {
     primaryRole = 'ADMINISTRATOR';
+    dashboardRole = 'admin';
   } else if (isStudent) {
     primaryRole = 'STUDENT';
+    dashboardRole = 'student';
   }
 
   // IDENTITY-FIRST: Enhanced logging with admission number
@@ -212,7 +215,7 @@ export default function Home() {
           </div>
 
           <Dashboard 
-            role={primaryRole} 
+            role={dashboardRole} 
             data={{ user: session.user, roles: roles }}
             admissionNumber={admissionNumber}
           />
