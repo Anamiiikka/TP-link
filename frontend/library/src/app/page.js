@@ -2,6 +2,11 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Dashboard from "./components/Dashboard";
 import React from "react";
+import { 
+  getAdmissionNumber, 
+  checkUserPermissions, 
+  logUserActivity 
+} from "../utils/identity";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -19,6 +24,11 @@ export default function Home() {
   };
 
   async function handleLogout() {
+    // IDENTITY-FIRST: Log logout activity
+    if (session) {
+      logUserActivity(session, 'LOGOUT', 'library');
+    }
+
     // Clear local app session first
     await signOut({ redirect: false });
 
@@ -72,10 +82,18 @@ export default function Home() {
     }
   }
 
+  // IDENTITY-FIRST: Log access attempt when user logs in
+  if (session) {
+    logUserActivity(session, 'PORTAL_ACCESS', 'library', {
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+    });
+  }
+
   // Get roles and determine user's primary role
   const roles = getRolesFromToken(session);
-  const isAdmin = roles.includes('Administrator') || roles.includes('administrator');
-  const isStudent = roles.includes('student');
+  const isAdmin = roles.some(role => role.toLowerCase() === 'administrator');
+  const isStudent = roles.some(role => role.toLowerCase() === 'student');
+  const isUnconfirmed = roles.some(role => role.toLowerCase() === 'unconfirmed');
   
   // Determine primary role for display
   let primaryRole = 'UNKNOWN';
@@ -85,10 +103,14 @@ export default function Home() {
     primaryRole = 'STUDENT';
   }
 
+  // IDENTITY-FIRST: Enhanced logging with admission number
+  const admissionNumber = session ? getAdmissionNumber(session) : null;
+  console.log('Identity:', admissionNumber);
   console.log('All user roles:', roles);
   console.log('Is administrator:', isAdmin);
   console.log('Is student:', isStudent);
   console.log('Primary role:', primaryRole);
+  console.log('Needs approval:', isUnconfirmed);
 
   return (
     <div style={{
@@ -120,7 +142,37 @@ export default function Home() {
                 letterSpacing: 1,
                 cursor: "pointer"
               }}>
-              Login
+              Login with Admission Number
+            </button>
+          </div>
+        </div>
+      ) : isUnconfirmed ? (
+        // IDENTITY-FIRST: Block unconfirmed users with their admission number
+        <div style={{display:'flex', alignItems:'center', justifyContent:'center', minHeight:'80vh'}}>
+          <div style={{...cardStyle, border: "1.5px solid #f39c12"}}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#e67e22", marginBottom: 12 }}>
+              Account Pending Approval
+            </h1>
+            <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 10 }}>
+              Identity: <strong>{admissionNumber}</strong>
+            </p>
+            <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 30 }}>
+              Your registration is successful but requires admin approval.
+              <br />Please wait for confirmation.
+            </p>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "10px 40px",
+                borderRadius: 7,
+                fontWeight: 600,
+                fontSize: 16,
+                background: "#e74c3c",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer"
+              }}>
+              Logout
             </button>
           </div>
         </div>
@@ -131,6 +183,9 @@ export default function Home() {
               <div style={{textAlign:'right', marginRight:8}}>
                 <div style={{fontSize:13, color:'#334155'}}>
                   {session.user?.name || session.user?.email}
+                </div>
+                <div style={{fontSize:12, color:'#64748b'}}>
+                  Identity: {admissionNumber}
                 </div>
                 <div style={{fontSize:12, color:'#64748b'}}>
                   {primaryRole}
@@ -156,7 +211,11 @@ export default function Home() {
             </div>
           </div>
 
-          <Dashboard role={primaryRole} data={{ user: session.user, roles: roles }} />
+          <Dashboard 
+            role={primaryRole} 
+            data={{ user: session.user, roles: roles }}
+            admissionNumber={admissionNumber}
+          />
         </div>
       )}
     </div>

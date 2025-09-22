@@ -17,7 +17,42 @@ export default function Home() {
     border: "1.5px solid #b6e0fa",
   };
 
+  // IDENTITY-FIRST: Get Admission Number from token
+  function getAdmissionNumber(session) {
+    try {
+      const payload = JSON.parse(atob(session.accessToken.split(".")[1]));
+      return payload.admission_number || payload.preferred_username || payload.sub;
+    } catch {
+      return null;
+    }
+  }
+
+  // IDENTITY-FIRST: Audit logging with admission number
+  function logUserActivity(session, action, resource = null, metadata = {}) {
+    const admissionNumber = getAdmissionNumber(session);
+    const logEntry = {
+      admissionNumber,
+      action,
+      resource,
+      timestamp: new Date().toISOString(),
+      source: 'lms-portal',
+      ...metadata
+    };
+    
+    console.log(`[AUDIT] ${admissionNumber}: ${action}`, logEntry);
+    
+    // In production, send to audit service:
+    // fetch('/api/audit', { method: 'POST', body: JSON.stringify(logEntry) });
+    
+    return logEntry;
+  }
+
   async function handleLogout() {
+    // IDENTITY-FIRST: Log logout activity
+    if (session) {
+      logUserActivity(session, 'LOGOUT', 'lms');
+    }
+
     await signOut({ redirect: false });
 
     const idToken = session?.idToken;
@@ -66,18 +101,30 @@ export default function Home() {
     }
   }
 
-  // Get roles and determine user type
-  const roles = getRolesFromSession(session);
-  const isAdmin = roles.includes('Administrator') || roles.includes('administrator');
-  const isStudent = roles.includes('student');
+  // IDENTITY-FIRST: Log access attempt when user logs in
+  if (session) {
+    logUserActivity(session, 'PORTAL_ACCESS', 'lms', {
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+    });
+  }
+
+  // Get roles and determine user type (case-insensitive)
+  const roles = getRolesFromSession(session) || [];
+  const isAdmin = roles.some(role => String(role || '').toLowerCase() === 'administrator');
+  const isStudent = roles.some(role => String(role || '').toLowerCase() === 'student');
+  const isUnconfirmed = roles.some(role => String(role || '').toLowerCase() === 'unconfirmed');
   
   let primaryRole = 'UNKNOWN';
   if (isAdmin) primaryRole = 'ADMINISTRATOR';
   else if (isStudent) primaryRole = 'STUDENT';
 
+  // IDENTITY-FIRST: Enhanced logging with admission number
+  const admissionNumber = session ? getAdmissionNumber(session) : null;
+  console.log('Identity:', admissionNumber);
   console.log('All roles:', roles);
   console.log('Primary role:', primaryRole);
   console.log('Is admin:', isAdmin);
+  console.log('Needs approval:', isUnconfirmed);
 
   return (
     <div
@@ -116,11 +163,40 @@ export default function Home() {
             Login with Admission Number
           </button>
         </div>
+      ) : isUnconfirmed ? (
+        // IDENTITY-FIRST: Block unconfirmed users with their admission number
+        <div style={{...cardStyle, border: "1.5px solid #f39c12"}}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#e67e22", marginBottom: 12 }}>
+            Account Pending Approval
+          </h1>
+          <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 10 }}>
+            Identity: <strong>{admissionNumber}</strong>
+          </p>
+          <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 30 }}>
+            Your registration is successful but requires admin approval.
+            <br />Please wait for confirmation.
+          </p>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "10px 40px",
+              borderRadius: 7,
+              fontWeight: 600,
+              fontSize: 16,
+              background: "#e74c3c",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer"
+            }}>
+            Logout
+          </button>
+        </div>
       ) : (
         <Dashboard 
           session={session} 
           role={primaryRole}
           onLogout={handleLogout}
+          admissionNumber={admissionNumber} // IDENTITY-FIRST: Pass admission number to Dashboard
         />
       )}
     </div>
