@@ -44,12 +44,142 @@ export default function Home() {
     }
   }
 
+  // Enhanced Login Page UI [web:36][web:37]
   if (!session) {
     return (
-      <main style={{ padding: 24 }}>
-        <h1>Admin Dashboard</h1>
-        <button onClick={() => signIn("keycloak")}>Login with Admission Number</button>
-      </main>
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        {/* Animated Background Elements */}
+        <div style={{
+          position: "absolute",
+          top: "-50%",
+          right: "-50%",
+          width: "100%",
+          height: "100%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+          animation: "float 6s ease-in-out infinite"
+        }}></div>
+        <div style={{
+          position: "absolute",
+          bottom: "-50%",
+          left: "-50%",
+          width: "100%",
+          height: "100%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)",
+          animation: "float 8s ease-in-out infinite reverse"
+        }}></div>
+
+        {/* Login Card */}
+        <div style={{
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "24px",
+          padding: "48px 40px",
+          width: "100%",
+          maxWidth: "420px",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 25px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          textAlign: "center",
+          position: "relative",
+          zIndex: 1
+        }}>
+          {/* Logo/Icon */}
+          <div style={{
+            width: "80px",
+            height: "80px",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 24px",
+            boxShadow: "0 10px 30px rgba(102, 126, 234, 0.4)"
+          }}>
+            <span style={{ fontSize: "36px", color: "white" }}>🎯</span>
+          </div>
+
+          {/* Title */}
+          <h1 style={{
+            fontSize: "32px",
+            fontWeight: "800",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            margin: "0 0 8px 0",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+          }}>
+            Admin Dashboard
+          </h1>
+
+          {/* Subtitle */}
+          <p style={{
+            color: "#6b7280",
+            fontSize: "16px",
+            fontWeight: "500",
+            margin: "0 0 32px 0",
+            lineHeight: "1.5"
+          }}>
+            Sign in to access the UniCampus IAM Platform
+          </p>
+
+          {/* Login Button */}
+          <button
+            onClick={() => signIn("keycloak")}
+            style={{
+              width: "100%",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "16px",
+              padding: "16px 24px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: "0 8px 25px rgba(102, 126, 234, 0.3)",
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 12px 35px rgba(102, 126, 234, 0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0px)";
+              e.target.style.boxShadow = "0 8px 25px rgba(102, 126, 234, 0.3)";
+            }}
+          >
+            🔐 Login with Admission Number
+          </button>
+
+          {/* Footer */}
+          <div style={{
+            marginTop: "32px",
+            padding: "20px 0 0",
+            borderTop: "1px solid #e5e7eb",
+            color: "#9ca3af",
+            fontSize: "14px"
+          }}>
+            UniCampus Identity & Access Management
+          </div>
+        </div>
+
+        {/* CSS Animation */}
+        <style jsx>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+          }
+        `}</style>
+      </div>
     );
   }
 
@@ -72,79 +202,348 @@ export default function Home() {
   console.log('Admin Permissions:', adminInfo?.permissions);
   console.log('All Roles:', Array.from(roles));
 
+  // Enhanced Pending Approval UI [web:39][web:42]
   if (adminInfo?.isUnconfirmed) {
     return (
-      <main style={{ 
-        padding: 24,
-        backgroundColor: '#fff5f5',
-        borderRadius: 8,
-        border: '1px solid #fecaca',
-        margin: 24
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        position: "relative",
+        overflow: "hidden"
       }}>
-        <h1 style={{ color: '#dc2626' }}>Admin Access Pending Approval</h1>
-        <p>Identity: <strong>{adminNumber}</strong></p>
-        <p>Your admin account requires approval before you can access the dashboard.</p>
-        <button 
-          onClick={handleLogout}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
+        {/* Background Pattern */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)",
+          backgroundSize: "20px 20px",
+          opacity: 0.4
+        }}></div>
+
+        <div style={{
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "24px",
+          padding: "48px 40px",
+          width: "100%",
+          maxWidth: "480px",
+          boxShadow: "0 20px 60px rgba(245, 158, 11, 0.2), 0 8px 25px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(251, 191, 36, 0.3)",
+          textAlign: "center",
+          position: "relative",
+          zIndex: 1
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: "80px",
+            height: "80px",
+            background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 24px",
+            boxShadow: "0 10px 30px rgba(245, 158, 11, 0.4)"
           }}>
-          Logout
-        </button>
-      </main>
+            <span style={{ fontSize: "36px", color: "white" }}>⏳</span>
+          </div>
+
+          <h1 style={{
+            fontSize: "28px",
+            fontWeight: "800",
+            color: "#dc2626",
+            margin: "0 0 16px 0",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+          }}>
+            Admin Access Pending Approval
+          </h1>
+
+          <div style={{
+            background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+            borderRadius: "12px",
+            padding: "20px",
+            margin: "24px 0",
+            border: "1px solid #f59e0b"
+          }}>
+            <p style={{
+              color: "#92400e",
+              fontSize: "16px",
+              fontWeight: "600",
+              margin: "0 0 8px 0"
+            }}>
+              Identity: <strong style={{ color: "#78350f" }}>{adminNumber}</strong>
+            </p>
+            <p style={{
+              color: "#92400e",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              margin: 0
+            }}>
+              Your admin account requires approval before you can access the dashboard. 
+              Please contact the system administrator for assistance.
+            </p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "14px 28px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: "0 8px 25px rgba(220, 38, 38, 0.3)",
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 12px 35px rgba(220, 38, 38, 0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0px)";
+              e.target.style.boxShadow = "0 8px 25px rgba(220, 38, 38, 0.3)";
+            }}
+          >
+            🚪 Logout
+          </button>
+
+          <div style={{
+            marginTop: "24px",
+            color: "#6b7280",
+            fontSize: "12px"
+          }}>
+            Contact: admin@unicampus.edu for immediate assistance
+          </div>
+        </div>
+      </div>
     );
   }
 
+  // Enhanced Access Denied UI [web:39][web:43]
   if (!isAdmin) {
     return (
-      <main style={{ 
-        padding: 24,
-        backgroundColor: '#fef2f2',
-        borderRadius: 8,
-        border: '1px solid #fecaca',
-        margin: 24
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        position: "relative",
+        overflow: "hidden"
       }}>
-        <h1 style={{ color: '#dc2626' }}>Access Denied</h1>
-        <p>Identity: <strong>{adminNumber}</strong></p>
-        <p>Administrator role required.</p>
-        <button 
-          onClick={handleLogout}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
+        {/* Background Pattern */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0)",
+          backgroundSize: "30px 30px",
+          opacity: 0.3
+        }}></div>
+
+        <div style={{
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "24px",
+          padding: "48px 40px",
+          width: "100%",
+          maxWidth: "480px",
+          boxShadow: "0 20px 60px rgba(220, 38, 38, 0.2), 0 8px 25px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(254, 202, 202, 0.5)",
+          textAlign: "center",
+          position: "relative",
+          zIndex: 1
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: "80px",
+            height: "80px",
+            background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 24px",
+            boxShadow: "0 10px 30px rgba(220, 38, 38, 0.4)"
           }}>
-          Logout
-        </button>
-      </main>
+            <span style={{ fontSize: "36px", color: "white" }}>🚫</span>
+          </div>
+
+          <h1 style={{
+            fontSize: "28px",
+            fontWeight: "800",
+            color: "#dc2626",
+            margin: "0 0 16px 0",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+          }}>
+            Access Denied
+          </h1>
+
+          <div style={{
+            background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+            borderRadius: "12px",
+            padding: "20px",
+            margin: "24px 0",
+            border: "1px solid #fecaca"
+          }}>
+            <p style={{
+              color: "#b91c1c",
+              fontSize: "16px",
+              fontWeight: "600",
+              margin: "0 0 12px 0"
+            }}>
+              Identity: <strong style={{ color: "#7f1d1d" }}>{adminNumber}</strong>
+            </p>
+            <p style={{
+              color: "#b91c1c",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              margin: "0 0 16px 0"
+            }}>
+              Administrator role required to access this dashboard.
+            </p>
+            <div style={{
+              background: "rgba(220, 38, 38, 0.1)",
+              borderRadius: "8px",
+              padding: "12px",
+              border: "1px dashed #dc2626"
+            }}>
+              <p style={{
+                color: "#7f1d1d",
+                fontSize: "12px",
+                margin: 0,
+                fontWeight: "500"
+              }}>
+                <strong>Current Roles:</strong> {Array.from(roles).join(', ') || 'None assigned'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "14px 28px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: "0 8px 25px rgba(220, 38, 38, 0.3)",
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 12px 35px rgba(220, 38, 38, 0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0px)";
+              e.target.style.boxShadow = "0 8px 25px rgba(220, 38, 38, 0.3)";
+            }}
+          >
+            🚪 Logout
+          </button>
+
+          <div style={{
+            marginTop: "24px",
+            color: "#6b7280",
+            fontSize: "12px"
+          }}>
+            Need admin access? Contact your system administrator
+          </div>
+        </div>
+      </div>
     );
   }
 
+  // Original Admin Dashboard (Enhanced Header) [web:40][web:49]
   return (
     <main style={{ padding: 0, background: '#f6f8fa', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      {/* Header */}
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 40px 0 40px' }}>
+      {/* Enhanced Header */}
+      <header style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        borderBottom: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '20px 40px'
+      }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Dashboard</h1>
-          <div style={{ color: '#64748b', fontSize: 15, marginTop: 4 }}>UniCampus IAM Platform - System Overview and Analytics</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ textAlign: 'right', marginRight: 8 }}>
-            <div style={{ fontWeight: 600 }}>{session.user?.name || session.user?.email}</div>
-            <div style={{ fontSize: 13, color: '#64748b' }}>System Administrator</div>
+          <h1 style={{
+            fontSize: '36px',
+            fontWeight: '800',
+            margin: 0,
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Dashboard
+          </h1>
+          <div style={{
+            color: '#64748b',
+            fontSize: '16px',
+            marginTop: '4px',
+            fontWeight: '500'
+          }}>
+            UniCampus IAM Platform - System Overview and Analytics
           </div>
-          <button onClick={handleLogout} style={{ background: '#f1f5f9', border: 'none', borderRadius: 20, padding: '8px 18px', color: '#dc2626', fontWeight: 600, cursor: 'pointer' }}>Logout</button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+            borderRadius: '16px',
+            padding: '12px 20px',
+            textAlign: 'right',
+            border: '1px solid #cbd5e1'
+          }}>
+            <div style={{ fontWeight: '700', fontSize: '16px', color: '#1e293b' }}>
+              {session.user?.name || session.user?.email}
+            </div>
+            <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+              System Administrator
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+              border: 'none',
+              borderRadius: '14px',
+              padding: '12px 24px',
+              color: 'white',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '15px',
+              boxShadow: '0 4px 15px rgba(220, 38, 38, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(220, 38, 38, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0px)';
+              e.target.style.boxShadow = '0 4px 15px rgba(220, 38, 38, 0.3)';
+            }}
+          >
+            🚪 Logout
+          </button>
         </div>
       </header>
 
+      {/* Rest of the dashboard remains the same */}
       {/* Top Cards */}
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, margin: '32px 40px 0 40px' }}>
         {/* Total Users */}
