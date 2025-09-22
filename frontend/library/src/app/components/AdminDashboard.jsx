@@ -34,6 +34,7 @@ const StatCard = ({title, value, accent, icon, trend, description}) => (
 );
 
 export default function AdminDashboard({data, session, onLogout}) {
+  // Extract admin name from session - don't hardcode
   const adminName = session?.user?.name || session?.user?.preferred_username || session?.user?.email || 'Administrator';
   
   const defaults = {
@@ -72,12 +73,12 @@ export default function AdminDashboard({data, session, onLogout}) {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="flex relative z-10">
+      <div className="flex relative z-10 h-screen">
         {/* Enhanced Sidebar */}
         <aside className="w-72 bg-gradient-to-b from-purple-600 via-purple-700 to-indigo-800 text-white flex flex-col p-6 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
           
-          <div className="relative z-10">
+          <div className="relative z-10 h-full flex flex-col">
             <div className="flex items-center mb-8">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mr-3">
                 <span className="text-2xl">📚</span>
@@ -121,6 +122,7 @@ export default function AdminDashboard({data, session, onLogout}) {
                 </div>
               </div>
 
+              {/* FIXED LOGOUT BUTTON - calls onLogout prop */}
               <button
                 onClick={onLogout}
                 className="w-full bg-red-500/90 hover:bg-red-600 text-white py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
@@ -132,7 +134,7 @@ export default function AdminDashboard({data, session, onLogout}) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 relative z-10">
+        <main className="flex-1 p-8 overflow-y-auto relative z-10">
           {/* Enhanced Top Bar */}
           <div className="flex justify-between items-center mb-8 bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
             <div>
@@ -191,7 +193,7 @@ export default function AdminDashboard({data, session, onLogout}) {
             />
           </div>
 
-          {/* Enhanced Content Grid */}
+          {/* Enhanced Content Grid - Same layout as before but with better styling */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Fees Pending */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-500">
