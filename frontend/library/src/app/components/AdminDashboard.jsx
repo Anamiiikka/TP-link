@@ -1,143 +1,194 @@
+
 import React from 'react';
 
-const StatCard = ({title, value, accent, icon}) => (
-  <div className={`bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 ${accent || 'border-indigo-500'} transform hover:scale-105`}>
-    <div className="flex items-center justify-between mb-2">
-      <div className="text-gray-600 text-sm font-medium">{title}</div>
-      <span className="text-2xl">{icon}</span>
-    </div>
-    <div className="text-3xl font-bold text-gray-800">{value}</div>
-  </div>
-);
+// Sidebar navigation items
+const sidebarItems = [
+  { icon: '🏠', label: 'Dashboard' },
+  { icon: '👥', label: 'Students' },
+  { icon: '📚', label: 'Books Available' },
+  { icon: '🔄', label: 'Book Issued/Return' },
+  { icon: '💸', label: 'Fees pending' },
+  { icon: '💖', label: 'Wishlist' },
+  { icon: '⚙️', label: 'Settings' },
+];
 
-const ProgressBar = ({label, value, max, color}) => (
-  <div className="mb-4">
-    <div className="flex justify-between text-sm mb-1">
-      <span className="text-gray-600">{label}</span>
-      <span className="text-gray-800 font-medium">{value}/{max}</span>
-    </div>
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div className={`h-2 rounded-full ${color} transition-all duration-500`} style={{width: `${(value/max)*100}%`}}></div>
-    </div>
-  </div>
-);
-
-export default function AdminDashboard({data}){
+export default function AdminDashboard({data}) {
   const defaults = {
-    totalBooks: 1842,
-    totalStudents: 512,
-    loansToday: 28,
-    overdue: 7,
-    recentActivities: [
-      {id:1, text:'Issued "Eloquent JavaScript" to Alice', time:'2h ago'},
-      {id:2, text:'Returned "Clean Code" by Bob', time:'5h ago'},
-      {id:3, text:'Marked 3 books as missing', time:'1d ago'},
+    totalStudents: 2589,
+    booksAvailable: 22589,
+    booksIssued: 15,
+    booksDue: 250,
+    feesPending: [
+      { id: 1, student: 'Alony Haust', date: 'May 25,2023', amount: '$31.48', status: 'Pending' },
+      { id: 2, student: 'Jimmy Fermin', date: 'May 31,2023', amount: '$50.18', status: 'Pending' },
     ],
-    notifications: [
-      {id:1, type:'warning', message:'5 books overdue', time:'10m ago'},
-      {id:2, type:'info', message:'New student registered', time:'1h ago'},
+    studentProfile: [
+      { id: 1, name: 'Wade Warren', class: '2nd Year BTech', doj: 'May 20,2023', status: 'Approved' },
+      { id: 2, name: 'Robert Fox', class: '3rd Year BTech', doj: 'May 12,2023', status: 'Approved' },
+    ],
+    bookIssued: [
+      { id: 1, sno: 'A02', student: 'Floyd Miles', book: 'The Journey Within', issued: 'May 22,2023', return: 'July 20,2023', status: 'Paid' },
+      { id: 2, sno: 'A05', student: 'Robert Fox', book: 'Hidden Secrets', issued: 'May 21,2023', return: 'Aug 10,2023', status: 'Pending' },
+      { id: 3, sno: 'AC04', student: 'Guy Hawkins', book: 'Beyond Boundaries', issued: 'April 10,2023', return: 'May 20,2023', status: 'Paid' },
+      { id: 4, sno: 'A09', student: 'Jenny Wilson', book: 'Serenity Found', issued: 'April 30,2023', return: 'Dec 20,2023', status: 'Paid' },
+      { id: 5, sno: 'A05', student: 'Jerry Wilson', book: 'The Mother', issued: 'April 20,2023', return: 'Dec 23,2023', status: 'Paid' },
+    ],
+    wishlist: [
+      { id: 1, title: 'Don’t Make Me Think', author: 'Steve Krug, 2000' },
+      { id: 2, title: 'The Design of Everyday Things', author: 'Don Norman, 1988' },
+      { id: 3, title: 'Rich Dad Poor Dad', author: 'Robert T. Kiyosaki, 1997' },
     ],
   };
-
-  // Merge provided data with defaults to ensure arrays exist
-  const sample = {
-    ...defaults,
-    ...(data || {}),
-    recentActivities: Array.isArray(data?.recentActivities) ? data.recentActivities : defaults.recentActivities,
-    notifications: Array.isArray(data?.notifications) ? data.notifications : defaults.notifications,
-  };
+  const sample = { ...defaults, ...(data || {}) };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 animate-fade-in">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-          📚 Library Admin Dashboard
-        </h1>
-        <p className="text-gray-600 text-lg">Manage inventory, monitor loans, and review activity.</p>
-      </header>
-
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Books" value={sample.totalBooks} accent="border-teal-500" icon="📖" />
-        <StatCard title="Total Students" value={sample.totalStudents} accent="border-indigo-500" icon="👥" />
-        <StatCard title="Loans Today" value={sample.loansToday} accent="border-amber-500" icon="🔄" />
-        <StatCard title="Overdue" value={sample.overdue} accent="border-red-500" icon="⚠️" />
-      </section>
-
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-              📊 Recent Activity
-              <span className="ml-2 bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-medium">Live</span>
-            </h3>
-            <ul className="space-y-3">
-              {(sample.recentActivities || []).map(act => (
-                <li key={act.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 rounded-lg px-2 transition-colors duration-200">
-                  <div className="text-gray-700">{act.text}</div>
-                  <div className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{act.time}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">🚀 Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md">
-                ➕ Add Book
-              </button>
-              <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md">
-                👤 Register Student
-              </button>
-              <button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md">
-                📈 Generate Report
-              </button>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f6f0ff' }}>
+      {/* Sidebar */}
+      <aside style={{ width: 240, background: 'linear-gradient(180deg,#7c3aed 0%,#a78bfa 100%)', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 24, borderRadius: 24, margin: 16 }}>
+        <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 32, letterSpacing: 1 }}>Library Pro</div>
+        <nav style={{ width: '100%' }}>
+          {sidebarItems.map((item, i) => (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 18px', borderRadius: 12, background: i === 0 ? '#fff' : 'transparent', color: i === 0 ? '#7c3aed' : '#fff', fontWeight: 600, marginBottom: 6, cursor: 'pointer', fontSize: 16 }}>
+              <span>{item.icon}</span> {item.label}
             </div>
+          ))}
+        </nav>
+        <div style={{ marginTop: 'auto', width: '100%' }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 16, color: '#7c3aed', textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Want to upgrade?</div>
+            <button style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }}>Upgrade now</button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#ede9fe', borderRadius: 12, padding: 10 }}>
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" style={{ width: 36, height: 36, borderRadius: '50%' }} />
+            <div>
+              <div style={{ fontWeight: 600, color: '#7c3aed' }}>Vanshika Pandey</div>
+              <div style={{ fontSize: 13, color: '#7c3aed' }}>HR Manager</div>
+            </div>
+          </div>
+          <button style={{ marginTop: 16, width: '100%', background: '#fff', color: '#7c3aed', border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, cursor: 'pointer' }}>Logout</button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main style={{ flex: 1, padding: 32 }}>
+        {/* Top Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#7c3aed' }}>Welcome Saiba Sen! 👋</div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <input type="date" style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 12px', fontSize: 15 }} />
+            <button style={{ background: '#ede9fe', color: '#7c3aed', border: 'none', borderRadius: 8, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Sorting</button>
+            <button style={{ background: '#ede9fe', color: '#7c3aed', border: 'none', borderRadius: 8, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Filter</button>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">📈 Inventory Snapshot</h3>
-            <ProgressBar label="Available" value={1720} max={1842} color="bg-green-500" />
-            <ProgressBar label="Reserved" value={95} max={1842} color="bg-yellow-500" />
-            <ProgressBar label="Missing" value={27} max={1842} color="bg-red-500" />
+        {/* Stat Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 32 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px #ede9fe', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', borderTop: '4px solid #7c3aed' }}>
+            <div style={{ color: '#7c3aed', fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Total Students</div>
+            <div style={{ fontSize: 28, fontWeight: 700 }}>{sample.totalStudents}</div>
+            <div style={{ color: '#22c55e', fontWeight: 600, fontSize: 14 }}>+2.5%</div>
           </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">🔔 Notifications</h3>
-            <ul className="space-y-3">
-              {(sample.notifications || []).map(notif => (
-                <li key={notif.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-lg">{notif.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-700">{notif.message}</div>
-                    <div className="text-xs text-gray-500 mt-1">{notif.time}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px #ede9fe', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', borderTop: '4px solid #a78bfa' }}>
+            <div style={{ color: '#a78bfa', fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Books available</div>
+            <div style={{ fontSize: 28, fontWeight: 700 }}>{sample.booksAvailable}</div>
+            <div style={{ color: '#22c55e', fontWeight: 600, fontSize: 14 }}>+2.5%</div>
           </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">⚙️ System Health</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Database</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">OK</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Search Index</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">OK</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Background Jobs</span>
-                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">Delayed</span>
-              </div>
-            </div>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px #ede9fe', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', borderTop: '4px solid #7c3aed' }}>
+            <div style={{ color: '#7c3aed', fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Book Issued</div>
+            <div style={{ fontSize: 28, fontWeight: 700 }}>{sample.booksIssued}</div>
+            <div style={{ color: '#ef4444', fontWeight: 600, fontSize: 14 }}>-2.5%</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px #ede9fe', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', borderTop: '4px solid #a78bfa' }}>
+            <div style={{ color: '#a78bfa', fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Book due for Return</div>
+            <div style={{ fontSize: 28, fontWeight: 700 }}>{sample.booksDue}</div>
+            <div style={{ color: '#22c55e', fontWeight: 600, fontSize: 14 }}>+2.5%</div>
           </div>
         </div>
-      </section>
+
+        {/* Fees Pending & Student Profile */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.5fr', gap: 24, marginBottom: 32 }}>
+          {/* Fees Pending */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 2px 8px #ede9fe' }}>
+            <div style={{ fontWeight: 700, color: '#7c3aed', marginBottom: 12 }}>Fees Pending <span style={{ float: 'right', color: '#a78bfa', fontWeight: 500, fontSize: 14, cursor: 'pointer' }}>View All</span></div>
+            <table style={{ width: '100%', fontSize: 15 }}>
+              <thead>
+                <tr style={{ color: '#a78bfa', textAlign: 'left' }}>
+                  <th>Students</th><th>Date</th><th>Amount</th><th>Status</th><th>Invoice</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sample.feesPending.map(row => (
+                  <tr key={row.id} style={{ borderBottom: '1px solid #f3e8ff' }}>
+                    <td>{row.student}</td>
+                    <td>{row.date}</td>
+                    <td>{row.amount}</td>
+                    <td><span style={{ background: '#fde68a', color: '#b45309', borderRadius: 8, padding: '2px 10px', fontWeight: 600 }}>{row.status}</span></td>
+                    <td><span style={{ color: '#a78bfa', fontWeight: 700, cursor: 'pointer' }}>🧾</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Student Profile */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 2px 8px #ede9fe' }}>
+            <div style={{ fontWeight: 700, color: '#7c3aed', marginBottom: 12 }}>Student Profile <span style={{ float: 'right', color: '#a78bfa', fontWeight: 500, fontSize: 14, cursor: 'pointer' }}>View All</span></div>
+            <table style={{ width: '100%', fontSize: 15 }}>
+              <thead>
+                <tr style={{ color: '#a78bfa', textAlign: 'left' }}>
+                  <th>Students</th><th>Class</th><th>D.O.J</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sample.studentProfile.map(row => (
+                  <tr key={row.id} style={{ borderBottom: '1px solid #f3e8ff' }}>
+                    <td>{row.name}</td>
+                    <td>{row.class}</td>
+                    <td>{row.doj}</td>
+                    <td><span style={{ background: '#bbf7d0', color: '#15803d', borderRadius: 8, padding: '2px 10px', fontWeight: 600 }}>{row.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Wishlist */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 2px 8px #ede9fe', minWidth: 220 }}>
+            <div style={{ fontWeight: 700, color: '#7c3aed', marginBottom: 12 }}>Wishlist</div>
+            {sample.wishlist.map(book => (
+              <div key={book.id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <img src={`https://covers.openlibrary.org/b/id/${book.id + 823415}-M.jpg`} alt={book.title} style={{ width: 44, height: 60, borderRadius: 8, objectFit: 'cover', background: '#ede9fe' }} />
+                <div>
+                  <div style={{ fontWeight: 600, color: '#7c3aed' }}>{book.title}</div>
+                  <div style={{ fontSize: 13, color: '#a78bfa' }}>{book.author}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Book Issued/Returned Table */}
+        <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 2px 8px #ede9fe', marginBottom: 32 }}>
+          <div style={{ fontWeight: 700, color: '#7c3aed', marginBottom: 12 }}>Book Issued / Returned <span style={{ float: 'right', color: '#a78bfa', fontWeight: 500, fontSize: 14, cursor: 'pointer' }}>View All</span></div>
+          <table style={{ width: '100%', fontSize: 15 }}>
+            <thead>
+              <tr style={{ color: '#a78bfa', textAlign: 'left' }}>
+                <th>Sno.</th><th>Student name</th><th>Book name</th><th>Issued date</th><th>Return date</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sample.bookIssued.map(row => (
+                <tr key={row.id} style={{ borderBottom: '1px solid #f3e8ff' }}>
+                  <td>{row.sno}</td>
+                  <td>{row.student}</td>
+                  <td>{row.book}</td>
+                  <td>{row.issued}</td>
+                  <td>{row.return}</td>
+                  <td><span style={{ background: row.status === 'Paid' ? '#bbf7d0' : '#fde68a', color: row.status === 'Paid' ? '#15803d' : '#b45309', borderRadius: 8, padding: '2px 10px', fontWeight: 600 }}>{row.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
   );
 }

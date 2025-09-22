@@ -7,7 +7,7 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/keycloak
       KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: Database@1
+      KC_DB_PASSWORD: shreya
     command: start-dev
     ports:
       - "8080:8080"
