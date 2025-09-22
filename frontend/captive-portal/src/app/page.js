@@ -1,6 +1,6 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { 
   getAdmissionNumber, 
   checkNetworkAccess, 
@@ -12,20 +12,32 @@ export default function Home() {
   const [networkAuth, setNetworkAuth] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const cardStyle = {
-    background: "rgba(255,255,255,0.90)",
-    borderRadius: 20,
-    boxShadow: "0 4px 32px 2px #d2e1fc99",
-    padding: "42px 48px",
-    minWidth: 340,
-    marginTop: 40,
-    maxWidth: "90vw",
+  // Modern card styling with inline styles that work
+  const baseCardStyle = {
+    background: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "24px",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+    padding: "48px",
+    minWidth: "360px",
+    maxWidth: "500px",
+    margin: "16px",
     textAlign: "center",
-    border: "1.5px solid #cff3ff"
+    border: "1px solid rgba(148, 163, 184, 0.2)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    animation: "fadeInUp 0.6s ease-out"
+  };
+  
+  const cardVariants = {
+    default: { borderColor: "rgba(56, 189, 248, 0.3)", background: "rgba(255, 255, 255, 0.95)" },
+    success: { borderColor: "rgba(16, 185, 129, 0.4)", background: "rgba(236, 253, 245, 0.9)" },
+    warning: { borderColor: "rgba(245, 158, 11, 0.4)", background: "rgba(254, 252, 232, 0.9)" },
+    error: { borderColor: "rgba(239, 68, 68, 0.4)", background: "rgba(254, 242, 242, 0.9)" },
+    loading: { borderColor: "rgba(59, 130, 246, 0.4)", background: "rgba(239, 246, 255, 0.9)" }
   };
 
   // STEP 2: Get real network authorization from API
-  async function requestNetworkAccess() {
+  const requestNetworkAccess = useCallback(async () => {
     setLoading(true);
     try {
       console.log('Requesting network authorization...');
@@ -54,14 +66,14 @@ export default function Home() {
       console.error('Network authorization error:', error);
     }
     setLoading(false);
-  }
+  }, [session]);
 
   // Auto-request network access when user logs in
   useEffect(() => {
     if (session && !networkAuth) {
       requestNetworkAccess();
     }
-  }, [session]);
+  }, [session, networkAuth, requestNetworkAccess]);
 
   async function handleLogout() {
     // IDENTITY-FIRST: Log network disconnect
@@ -93,225 +105,602 @@ export default function Home() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(120deg, #e0edfc 0%, #fffbe2 70%, #e4ffe6 100%)",
+      background: "linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #f0fdf4 100%)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center"
+      justifyContent: "center",
+      padding: "16px"
     }}>
       {!session ? (
-        <div style={cardStyle}>
-          <h1 style={{
-            fontSize: 32,
-            fontWeight: 700,
-            letterSpacing: 0.5,
-            color: "#2288e2",
-            marginBottom: 14
-          }}>Wi‑Fi Captive Portal</h1>
-          <p style={{
-            color: "#44496a",
-            fontSize: 18,
-            marginBottom: 30,
-            fontWeight: 500
-          }}>
-            Sign in to get network access.
-          </p>
+        <div style={{...baseCardStyle, ...cardVariants.default}}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "linear-gradient(135deg, #3b82f6, #06b6d4)",
+              borderRadius: "50%",
+              margin: "0 auto 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 10px 25px rgba(59, 130, 246, 0.3)"
+            }}>
+              <svg style={{ width: "32px", height: "32px", color: "white" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+              </svg>
+            </div>
+            <h1 style={{
+              fontSize: "32px",
+              fontWeight: "800",
+              color: "#1e293b",
+              marginBottom: "16px",
+              letterSpacing: "-0.5px"
+            }}>
+              Wi‑Fi Captive Portal
+            </h1>
+            <p style={{
+              color: "#64748b",
+              fontSize: "18px",
+              fontWeight: "500",
+              lineHeight: "1.6"
+            }}>
+              Sign in to get network access
+            </p>
+          </div>
+          
           <button
             onClick={() => signIn("keycloak")}
             style={{
-              marginTop: 15,
-              padding: "10px 44px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 17,
-              background: "linear-gradient(90deg,#4eb8f4,#6adec4 90%)",
-              color: "#fff",
+              width: "100%",
+              background: "linear-gradient(135deg, #3b82f6, #06b6d4)",
+              color: "white",
+              fontWeight: "600",
+              fontSize: "16px",
+              padding: "16px 32px",
+              borderRadius: "12px",
               border: "none",
-              boxShadow: "0 2px 16px #bfefff70",
-              letterSpacing: 1,
-              cursor: "pointer"
-            }}>
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px"
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 8px 25px rgba(59, 130, 246, 0.5)";
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "0 4px 15px rgba(59, 130, 246, 0.4)";
+            }}
+          >
+            <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
             Login with Admission Number
           </button>
         </div>
       ) : loading ? (
         // Loading state while getting network authorization
-        <div style={{...cardStyle, border: "1.5px solid #fbbf24"}}>
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#f59e0b",
-            marginBottom: 12
+        <div style={{...baseCardStyle, ...cardVariants.loading}}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "#dbeafe",
+              borderRadius: "50%",
+              margin: "0 auto 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <div style={{
+                width: "32px",
+                height: "32px",
+                border: "3px solid #3b82f6",
+                borderTop: "3px solid transparent",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite"
+              }}></div>
+            </div>
+            <h1 style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              color: "#1d4ed8",
+              marginBottom: "24px"
+            }}>
+              Authorizing Network Access...
+            </h1>
+            <div style={{
+              background: "rgba(255, 255, 255, 0.7)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "16px"
+            }}>
+              <p style={{
+                color: "#1e40af",
+                fontWeight: "600",
+                fontSize: "16px",
+                marginBottom: "8px"
+              }}>
+                Identity: <span style={{
+                  fontFamily: "monospace",
+                  background: "#dbeafe",
+                  padding: "4px 8px",
+                  borderRadius: "4px"
+                }}>{admissionNumber}</span>
+              </p>
+            </div>
+            <p style={{
+              color: "#64748b",
+              fontSize: "14px"
+            }}>
+              Checking network permissions and configuring access...
+            </p>
+          </div>
+          
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px"
           }}>
-            Authorizing Network Access...
-          </h1>
-          <p style={{
-            fontSize: 18,
-            color: "#92400e",
-            marginBottom: 10,
-            fontWeight: 500
-          }}>Identity: <strong>{admissionNumber}</strong></p>
-          <p style={{ color: "#78716c", fontSize: 17, marginBottom: 30 }}>
-            Checking network permissions...
-          </p>
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  background: "#3b82f6",
+                  borderRadius: "50%",
+                  animation: `bounce 1.4s ease-in-out ${i * 0.16}s infinite both`
+                }}
+              ></div>
+            ))}
+          </div>
         </div>
       ) : networkAuth?.networkPolicy?.accessLevel === 'PENDING_APPROVAL' || networkInfo?.isUnconfirmed ? (
         // IDENTITY-FIRST: Block unconfirmed users from network access
-        <div style={{...cardStyle, border: "1.5px solid #f39c12"}}>
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#e67e22",
-            marginBottom: 12
-          }}>
-            Network Access Pending Approval
-          </h1>
-          <p style={{
-            fontSize: 18,
-            color: "#7f8c8d",
-            marginBottom: 10,
-            fontWeight: 500
-          }}>Identity: <strong>{admissionNumber}</strong></p>
-          <p style={{ color: "#7f8c8d", fontSize: 17, marginBottom: 30 }}>
-            Your account requires admin approval for network access.
-            <br />Please wait for confirmation.
-          </p>
+        <div style={{...baseCardStyle, ...cardVariants.warning}}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "#fef3c7",
+              borderRadius: "50%",
+              margin: "0 auto 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <svg style={{ width: "32px", height: "32px", color: "#d97706" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h1 style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              color: "#b45309",
+              marginBottom: "24px"
+            }}>
+              Network Access Pending
+            </h1>
+            <div style={{
+              background: "rgba(255, 255, 255, 0.7)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "24px"
+            }}>
+              <p style={{
+                color: "#92400e",
+                fontWeight: "600",
+                fontSize: "16px"
+              }}>
+                Identity: <span style={{
+                  fontFamily: "monospace",
+                  background: "#fef3c7",
+                  padding: "4px 8px",
+                  borderRadius: "4px"
+                }}>{admissionNumber}</span>
+              </p>
+            </div>
+            <div style={{
+              background: "#fffbeb",
+              border: "1px solid #fed7aa",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "24px"
+            }}>
+              <p style={{
+                color: "#92400e",
+                fontSize: "15px",
+                lineHeight: "1.6",
+                margin: "0"
+              }}>
+                Your account requires admin approval for network access.
+                <br />
+                <strong>Please wait for confirmation from the IT department.</strong>
+              </p>
+            </div>
+          </div>
+          
           <button
             onClick={handleLogout}
             style={{
-              padding: "10px 44px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "#e74c3c",
-              color: "#fff",
+              width: "100%",
+              background: "linear-gradient(135deg, #ef4444, #dc2626)",
+              color: "white",
+              fontWeight: "600",
+              fontSize: "16px",
+              padding: "12px 24px",
+              borderRadius: "12px",
               border: "none",
-              cursor: "pointer"
-            }}>
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(239, 68, 68, 0.4)",
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px"
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 8px 25px rgba(239, 68, 68, 0.5)";
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "0 4px 15px rgba(239, 68, 68, 0.4)";
+            }}
+          >
+            <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             Disconnect
           </button>
         </div>
       ) : networkAuth?.success ? (
         // STEP 2: Show real network authorization data
-        <div style={cardStyle}>
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#11b681",
-            marginBottom: 12
-          }}>
-            Network Access Granted
-          </h1>
-          <p style={{
-            fontSize: 18,
-            color: "#3d7356",
-            marginBottom: 15,
-            fontWeight: 500
-          }}>Identity: <strong>{admissionNumber}</strong></p>
+        <div style={{...baseCardStyle, ...cardVariants.success}}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "#d1fae5",
+              borderRadius: "50%",
+              margin: "0 auto 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <svg style={{ width: "32px", height: "32px", color: "#059669" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              color: "#047857",
+              marginBottom: "24px"
+            }}>
+              Network Access Granted
+            </h1>
+            <div style={{
+              background: "rgba(255, 255, 255, 0.8)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "24px"
+            }}>
+              <p style={{
+                color: "#065f46",
+                fontWeight: "600",
+                fontSize: "16px"
+              }}>
+                Identity: <span style={{
+                  fontFamily: "monospace",
+                  background: "#d1fae5",
+                  padding: "4px 8px",
+                  borderRadius: "4px"
+                }}>{admissionNumber}</span>
+              </p>
+            </div>
+          </div>
           
           {/* Real Network Details from API */}
           <div style={{
-            backgroundColor: "#f0f9ff",
-            border: "1px solid #bae6fd",
-            borderRadius: 10,
-            padding: 20,
-            margin: "20px 0",
+            background: "rgba(255, 255, 255, 0.9)",
+            border: "1px solid #a7f3d0",
+            borderRadius: "16px",
+            padding: "24px",
+            marginBottom: "24px",
             textAlign: "left"
           }}>
-            <h3 style={{color: "#0c4a6e", marginBottom: 15}}>Network Configuration:</h3>
-            <p><strong>VLAN:</strong> {networkAuth.networkPolicy.vlan}</p>
-            <p><strong>Bandwidth:</strong> {networkAuth.networkPolicy.bandwidth}</p>
-            <p><strong>Access Level:</strong> {networkAuth.networkPolicy.accessLevel}</p>
-            <p><strong>Session Duration:</strong> {networkAuth.networkPolicy.sessionDuration}</p>
-            <p><strong>Allowed Ports:</strong> {networkAuth.networkPolicy.allowedPorts.join(', ')}</p>
-            <p><strong>Session ID:</strong> {networkAuth.networkPolicy.sessionId}</p>
+            <h3 style={{
+              color: "#065f46",
+              fontWeight: "700",
+              fontSize: "18px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px"
+            }}>
+              <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Network Configuration
+            </h3>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "12px",
+              fontSize: "14px"
+            }}>
+              {[
+                { label: "VLAN", value: networkAuth.networkPolicy.vlan },
+                { label: "Bandwidth", value: networkAuth.networkPolicy.bandwidth },
+                { label: "Access Level", value: networkAuth.networkPolicy.accessLevel },
+                { label: "Duration", value: networkAuth.networkPolicy.sessionDuration },
+                { label: "Allowed Ports", value: networkAuth.networkPolicy.allowedPorts.join(', '), fullWidth: true },
+                { label: "Session ID", value: networkAuth.networkPolicy.sessionId, fullWidth: true }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: "#ecfdf5",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    gridColumn: item.fullWidth ? "1 / -1" : "auto"
+                  }}
+                >
+                  <span style={{ fontWeight: "600", color: "#047857" }}>{item.label}:</span>
+                  <br />
+                  <span style={{
+                    fontFamily: "monospace",
+                    color: "#065f46",
+                    fontSize: item.fullWidth && item.label === "Session ID" ? "12px" : "14px",
+                    wordBreak: "break-all"
+                  }}>
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <p style={{ margin: "18px 0 24px", color: "#5a5b70" }}>
-            {networkAuth.networkPolicy.message}
-          </p>
-          
-          <button
-            onClick={requestNetworkAccess}
-            style={{
-              padding: "10px 30px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "linear-gradient(90deg,#4CAF50,#45a049 100%)",
-              color: "#fff",
-              border: "none",
-              marginRight: 10,
-              cursor: "pointer"
+          <div style={{
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            borderRadius: "12px",
+            padding: "16px",
+            marginBottom: "24px"
+          }}>
+            <p style={{
+              color: "#065f46",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              margin: "0"
             }}>
-            Refresh Access
-          </button>
+              {networkAuth.networkPolicy.message}
+            </p>
+          </div>
           
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "10px 44px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "linear-gradient(90deg,#e14b6b,#5ac3cb 100%)",
-              color: "#fff",
-              border: "none",
-              boxShadow: "0 2px 12px #f9bfc570",
-              letterSpacing: 1,
-              cursor: "pointer"
-            }}>
-            Disconnect
-          </button>
+          <div style={{
+            display: "flex",
+            flexDirection: window.innerWidth < 640 ? "column" : "row",
+            gap: "12px"
+          }}>
+            <button
+              onClick={requestNetworkAccess}
+              style={{
+                flex: "1",
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "white",
+                fontWeight: "600",
+                fontSize: "16px",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(16, 185, 129, 0.4)",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(16, 185, 129, 0.5)";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.4)";
+              }}
+            >
+              <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Access
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              style={{
+                flex: "1",
+                background: "linear-gradient(135deg, #64748b, #475569)",
+                color: "white",
+                fontWeight: "600",
+                fontSize: "16px",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(100, 116, 139, 0.4)",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(100, 116, 139, 0.5)";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "0 4px 15px rgba(100, 116, 139, 0.4)";
+              }}
+            >
+              <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Disconnect
+            </button>
+          </div>
         </div>
       ) : (
         // Fallback if network auth fails
-        <div style={{...cardStyle, border: "1.5px solid #ef4444"}}>
-          <h1 style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#dc2626",
-            marginBottom: 12
+        <div style={{...baseCardStyle, ...cardVariants.error}}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "#fee2e2",
+              borderRadius: "50%",
+              margin: "0 auto 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <svg style={{ width: "32px", height: "32px", color: "#dc2626" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              color: "#b91c1c",
+              marginBottom: "24px"
+            }}>
+              Network Access Failed
+            </h1>
+            <div style={{
+              background: "rgba(255, 255, 255, 0.7)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "24px"
+            }}>
+              <p style={{
+                color: "#991b1b",
+                fontWeight: "600",
+                fontSize: "16px"
+              }}>
+                Identity: <span style={{
+                  fontFamily: "monospace",
+                  background: "#fee2e2",
+                  padding: "4px 8px",
+                  borderRadius: "4px"
+                }}>{admissionNumber}</span>
+              </p>
+            </div>
+            <div style={{
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "24px"
+            }}>
+              <p style={{
+                color: "#991b1b",
+                fontSize: "15px",
+                lineHeight: "1.6",
+                margin: "0"
+              }}>
+                Unable to authorize network access. This could be due to:
+                <br />
+                • Network connectivity issues
+                <br />
+                • Server maintenance
+                <br />
+                • Account permissions
+              </p>
+            </div>
+          </div>
+          
+          <div style={{
+            display: "flex",
+            flexDirection: window.innerWidth < 640 ? "column" : "row",
+            gap: "12px"
           }}>
-            Network Access Failed
-          </h1>
-          <p style={{
-            fontSize: 18,
-            color: "#7f1d1d",
-            marginBottom: 10,
-            fontWeight: 500
-          }}>Identity: <strong>{admissionNumber}</strong></p>
-          <p style={{ color: "#78716c", fontSize: 17, marginBottom: 30 }}>
-            Unable to authorize network access. Please try again.
-          </p>
-          <button
-            onClick={requestNetworkAccess}
-            style={{
-              padding: "10px 30px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "#ef4444",
-              color: "#fff",
-              border: "none",
-              marginRight: 10,
-              cursor: "pointer"
-            }}>
-            Retry
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "10px 30px",
-              borderRadius: 7,
-              fontWeight: 600,
-              fontSize: 16,
-              background: "#6b7280",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer"
-            }}>
-            Logout
-          </button>
+            <button
+              onClick={requestNetworkAccess}
+              style={{
+                flex: "1",
+                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                color: "white",
+                fontWeight: "600",
+                fontSize: "16px",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(239, 68, 68, 0.4)",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(239, 68, 68, 0.5)";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "0 4px 15px rgba(239, 68, 68, 0.4)";
+              }}
+            >
+              <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Retry
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                flex: "1",
+                background: "linear-gradient(135deg, #64748b, #475569)",
+                color: "white",
+                fontWeight: "600",
+                fontSize: "16px",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(100, 116, 139, 0.4)",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(100, 116, 139, 0.5)";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "0 4px 15px rgba(100, 116, 139, 0.4)";
+              }}
+            >
+              <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>
